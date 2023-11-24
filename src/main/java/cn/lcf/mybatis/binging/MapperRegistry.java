@@ -1,7 +1,8 @@
 package cn.lcf.mybatis.binging;
 
-import cn.lcf.mybatis.session.SqlSession;
 import cn.hutool.core.lang.ClassScanner;
+import cn.lcf.mybatis.session.Configuration;
+import cn.lcf.mybatis.session.SqlSession;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -16,6 +17,12 @@ import java.util.Set;
 public class MapperRegistry {
 
     final Map<Class<?>, MapperProxyFactory<?>> knownMappers = new HashMap<>();
+
+    private Configuration configuration;
+
+    public MapperRegistry(Configuration configuration) {
+        this.configuration = configuration;
+    }
 
     public <T> T getMapper(Class<T> type, SqlSession sqlSession) {
         final MapperProxyFactory<T> mapperProxyFactory = (MapperProxyFactory<T>) knownMappers.get(type);
