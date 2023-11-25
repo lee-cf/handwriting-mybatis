@@ -1,9 +1,16 @@
 package cn.lcf.mybatis.session.defaults;
 
 import cn.lcf.mybatis.binging.MapperRegistry;
+import cn.lcf.mybatis.mapping.BoundSql;
+import cn.lcf.mybatis.mapping.Environment;
 import cn.lcf.mybatis.mapping.MappedStatement;
 import cn.lcf.mybatis.session.Configuration;
 import cn.lcf.mybatis.session.SqlSession;
+
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.util.List;
 
 /**
  * @author : lichaofeng
@@ -21,8 +28,23 @@ public class DefaultSqlSession implements SqlSession {
 
     @Override
     public <T> T selectOne(String statement, Object parameter) {
-        MappedStatement mappedStatement = configuration.getMappedStatement(statement);
-        return (T) ("你被代理了！" + "\n方法：" + statement + "\n入参：" + parameter + "\n待执行SQL：" + mappedStatement.getSql());
+        try {
+            MappedStatement mappedStatement = configuration.getMappedStatement(statement);
+            Environment environment = configuration.getEnvironment();
+
+            Connection connection = environment.getDataSource().getConnection();
+
+            BoundSql boundSql = mappedStatement.getBoundSql(parameter);
+            PreparedStatement preparedStatement = connection.prepareStatement(boundSql.getSql());
+            preparedStatement.setLong(1, Long.parseLong(((Object[]) parameter)[0].toString()));
+            ResultSet resultSet = preparedStatement.executeQuery();
+
+            List<T> objList = resultSet2Obj(resultSet, Class.forName(boundSql.getResultType()));
+            return objList.get(0);
+        }catch (Exception e){
+            e.printStackTrace();
+        }
+        return null;
     }
 
     @Override

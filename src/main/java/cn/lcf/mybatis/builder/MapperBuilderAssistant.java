@@ -1,6 +1,7 @@
 package cn.lcf.mybatis.builder;
 
 import cn.lcf.mybatis.mapping.MappedStatement;
+import cn.lcf.mybatis.mapping.SqlSource;
 import cn.lcf.mybatis.session.Configuration;
 
 /**
@@ -28,9 +29,12 @@ public class MapperBuilderAssistant extends BaseBuilder {
         this.currentNamespace = currentNamespace;
     }
 
-    public MappedStatement addMappedStatement(String id, String sql) {
-        MappedStatement statement = new MappedStatement(id, sql);
+    public MappedStatement addMappedStatement(String id, SqlSource sqlSource) {
+        MappedStatement statement = new MappedStatement(configuration, id, sqlSource);
         configuration.addMappedStatement(statement);
         return statement;
     }
+
+
+
 }

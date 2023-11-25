@@ -2,7 +2,9 @@ package cn.lcf.mybatis.builder.xml;
 
 import cn.lcf.mybatis.builder.BaseBuilder;
 import cn.lcf.mybatis.builder.MapperBuilderAssistant;
+import cn.lcf.mybatis.mapping.SqlSource;
 import cn.lcf.mybatis.parsing.XNode;
+import cn.lcf.mybatis.scripting.LanguageDriver;
 import cn.lcf.mybatis.session.Configuration;
 
 /**
@@ -26,7 +28,6 @@ public class XMLStatementBuilder extends BaseBuilder {
 
     public void parseStatementNode() {
         String id = context.getStringAttribute("id");
-        String sql = context.getStringBody();
         builderAssistant.addMappedStatement(id, sql);
     }
 }
