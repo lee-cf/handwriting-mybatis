@@ -1,9 +1,14 @@
 package cn.lcf.mybatis.session.defaults;
 
 import cn.lcf.mybatis.binging.MapperRegistry;
+import cn.lcf.mybatis.executor.Executor;
+import cn.lcf.mybatis.mapping.Environment;
 import cn.lcf.mybatis.session.Configuration;
 import cn.lcf.mybatis.session.SqlSession;
 import cn.lcf.mybatis.session.SqlSessionFactory;
+import cn.lcf.mybatis.session.TransactionIsolationLevel;
+import cn.lcf.mybatis.transaction.Transaction;
+import cn.lcf.mybatis.transaction.TransactionFactory;
 
 /**
  * @author : lichaofeng
@@ -22,6 +27,17 @@ public class DefaultSqlSessionFactory implements SqlSessionFactory {
 
     @Override
     public SqlSession openSession() {
-        return new DefaultSqlSession(configuration);
+        return openSessionFromDataSource(TransactionIsolationLevel.READ_COMMITTED,true);
+    }
+
+    private SqlSession openSessionFromDataSource(TransactionIsolationLevel level, boolean autoCommit) {
+        final Environment environment = configuration.getEnvironment();
+        final TransactionFactory transactionFactory = getTransactionFactoryFromEnvironment(environment);
+        Transaction tx  = transactionFactory.newTransaction(environment.getDataSource(), level, autoCommit);
+        final Executor executor = configuration.newExecutor(tx);
+        return new DefaultSqlSession(configuration, executor);
+    }
+    private TransactionFactory getTransactionFactoryFromEnvironment(Environment environment) {
+        return environment.getTransactionFactory();
     }
 }

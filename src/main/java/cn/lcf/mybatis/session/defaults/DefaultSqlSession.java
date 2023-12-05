@@ -1,10 +1,14 @@
 package cn.lcf.mybatis.session.defaults;
 
 import cn.lcf.mybatis.binging.MapperRegistry;
+import cn.lcf.mybatis.executor.Executor;
 import cn.lcf.mybatis.mapping.BoundSql;
 import cn.lcf.mybatis.mapping.Environment;
 import cn.lcf.mybatis.mapping.MappedStatement;
+import cn.lcf.mybatis.reflection.ParamNameResolver;
 import cn.lcf.mybatis.session.Configuration;
+import cn.lcf.mybatis.session.ResultHandler;
+import cn.lcf.mybatis.session.RowBounds;
 import cn.lcf.mybatis.session.SqlSession;
 
 import java.sql.Connection;
@@ -21,8 +25,11 @@ import java.util.List;
 public class DefaultSqlSession implements SqlSession {
     private Configuration configuration;
 
-    public DefaultSqlSession(Configuration configuration){
+    private final Executor executor;
+
+    public DefaultSqlSession(Configuration configuration,Executor executor){
         this.configuration = configuration;
+        this.executor = executor;
     }
 
 
@@ -38,9 +45,7 @@ public class DefaultSqlSession implements SqlSession {
             PreparedStatement preparedStatement = connection.prepareStatement(boundSql.getSql());
             preparedStatement.setLong(1, Long.parseLong(((Object[]) parameter)[0].toString()));
             ResultSet resultSet = preparedStatement.executeQuery();
-
-            List<T> objList = resultSet2Obj(resultSet, Class.forName(boundSql.getResultType()));
-            return objList.get(0);
+            return null;
         }catch (Exception e){
             e.printStackTrace();
         }
@@ -48,7 +53,31 @@ public class DefaultSqlSession implements SqlSession {
     }
 
     @Override
+    public <E> List<E> selectList(String statement, Object parameter, RowBounds rowBounds) {
+        return selectList(statement, parameter, rowBounds, Executor.NO_RESULT_HANDLER);
+    }
+    @Override
+    public <E> List<E> selectList(String statement, Object parameter) {
+        return this.selectList(statement, parameter, RowBounds.DEFAULT);
+    }
+    private <E> List<E> selectList(String statement, Object parameter, RowBounds rowBounds, ResultHandler handler) {
+        try {
+            MappedStatement ms = configuration.getMappedStatement(statement);
+            return executor.query(ms, wrapCollection(parameter), rowBounds, handler);
+        } catch (Exception e) {
+            throw new RuntimeException("Error querying database.  Cause: " + e, e);
+        }
+    }
+    private Object wrapCollection(final Object object) {
+        return ParamNameResolver.wrapToMapIfCollection(object, null);
+    }
+    @Override
     public <T> T getMapper(Class<T> type) {
         return configuration.getMapper(type, this);
+    }
+
+    @Override
+    public Configuration getConfiguration() {
+        return configuration;
     }
 }

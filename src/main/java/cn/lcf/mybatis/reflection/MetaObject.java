@@ -3,6 +3,7 @@ package cn.lcf.mybatis.reflection;
 import cn.lcf.mybatis.reflection.factory.ObjectFactory;
 import cn.lcf.mybatis.reflection.property.PropertyTokenizer;
 import cn.lcf.mybatis.reflection.wrapper.*;
+import lombok.Data;
 
 import java.util.Collection;
 import java.util.List;
@@ -14,6 +15,7 @@ import java.util.Map;
  * @description :
  * @modyified By:
  */
+@Data
 public class MetaObject {
     private Object originalObject;
     private ObjectWrapper objectWrapper;

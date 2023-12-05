@@ -1,7 +1,9 @@
 package demo;
 
-public interface IUserMapper {
-    String queryUserName(Long id);
+import java.util.List;
 
-    Integer queryUserAge(Long id);
+public interface IUserMapper {
+    List<String> queryUserName(Integer id);
+
+    Integer queryUserAge(Integer id);
 }

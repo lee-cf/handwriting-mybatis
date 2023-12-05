@@ -27,7 +27,25 @@ public class MapperProxy<T> implements InvocationHandler, Serializable {
         if (Object.class.equals(method.getDeclaringClass())) {
             return method.invoke(this, args);
         }else{
-            return "proxy: "+ sqlSession.selectOne(method.getName(),args);
+            MapperMethodInvoker mapperMethodInvoker = new PlainMethodInvoker(new MapperMethod(mapperInterface, method, sqlSession.getConfiguration()));
+            return mapperMethodInvoker.invoke(proxy,method,args,sqlSession);
+        }
+    }
+
+    interface MapperMethodInvoker {
+        Object invoke(Object proxy, Method method, Object[] args, SqlSession sqlSession) throws Throwable;
+    }
+    private static class PlainMethodInvoker implements MapperMethodInvoker {
+        private final MapperMethod mapperMethod;
+
+        public PlainMethodInvoker(MapperMethod mapperMethod) {
+            super();
+            this.mapperMethod = mapperMethod;
+        }
+
+        @Override
+        public Object invoke(Object proxy, Method method, Object[] args, SqlSession sqlSession) throws Throwable {
+            return mapperMethod.execute(sqlSession, args);
         }
     }
 }

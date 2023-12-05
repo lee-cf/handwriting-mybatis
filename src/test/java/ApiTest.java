@@ -8,6 +8,8 @@ import org.junit.Test;
 
 import java.io.IOException;
 import java.io.Reader;
+import java.util.Arrays;
+import java.util.List;
 
 /**
  * @author : lichaofeng
@@ -29,7 +31,7 @@ public class ApiTest {
         IUserMapper userDao = sqlSession.getMapper(IUserMapper.class);
 
         // 3. 测试验证
-        String res = userDao.queryUserName(1L);
-        log.info("测试结果：{}", res);
+       List<String> ss =  userDao.queryUserName(3);
+        System.out.println(Arrays.toString(ss.toArray()));
     }
 }

@@ -58,4 +58,9 @@ public class JdbcTransaction implements Transaction {
             connection.close();
         }
     }
+
+    @Override
+    public Integer getTimeout() throws SQLException {
+        return null;
+    }
 }

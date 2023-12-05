@@ -5,6 +5,7 @@ import cn.lcf.mybatis.builder.MapperBuilderAssistant;
 import cn.lcf.mybatis.mapping.SqlSource;
 import cn.lcf.mybatis.parsing.XNode;
 import cn.lcf.mybatis.scripting.LanguageDriver;
+import cn.lcf.mybatis.scripting.xmltags.XMLLanguageDriver;
 import cn.lcf.mybatis.session.Configuration;
 
 /**
@@ -28,6 +29,11 @@ public class XMLStatementBuilder extends BaseBuilder {
 
     public void parseStatementNode() {
         String id = context.getStringAttribute("id");
-        builderAssistant.addMappedStatement(id, sql);
+        String resultMap = context.getStringAttribute("resultMap");
+        String resultType = context.getStringAttribute("resultType");
+        Class<?> resultTypeClass = resolveClass(resultType);
+        LanguageDriver langDriver = new XMLLanguageDriver();
+        SqlSource sqlSource = langDriver.createSqlSource(configuration, context, null);
+        builderAssistant.addMappedStatement(id, resultMap,resultTypeClass, sqlSource);
     }
 }

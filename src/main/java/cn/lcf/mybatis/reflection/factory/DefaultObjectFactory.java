@@ -1,6 +1,7 @@
 package cn.lcf.mybatis.reflection.factory;
 
 import java.lang.reflect.Constructor;
+import java.util.Collection;
 
 /**
  * @author : lichaofeng
@@ -17,5 +18,10 @@ public class DefaultObjectFactory implements ObjectFactory {
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
+    }
+
+    @Override
+    public <T> boolean isCollection(Class<T> type) {
+        return Collection.class.isAssignableFrom(type);
     }
 }

@@ -7,6 +7,7 @@ import cn.lcf.mybatis.parsing.TokenHandler;
 import cn.lcf.mybatis.reflection.MetaClass;
 import cn.lcf.mybatis.reflection.MetaObject;
 import cn.lcf.mybatis.session.Configuration;
+import cn.lcf.mybatis.type.JdbcType;
 
 import java.util.ArrayList;
 import java.util.HashMap;

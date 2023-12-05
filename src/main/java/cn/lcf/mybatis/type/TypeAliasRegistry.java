@@ -1,5 +1,9 @@
 package cn.lcf.mybatis.type;
 
+import cn.lcf.mybatis.datasource.unpooled.UnpooledDataSource;
+import cn.lcf.mybatis.datasource.unpooled.UnpooledDataSourceFactory;
+import cn.lcf.mybatis.io.Resources;
+
 import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
@@ -11,7 +15,7 @@ import java.util.Map;
  * @modyified By:
  */
 public class TypeAliasRegistry {
-    private final Map<String, Class<?>> TYPE_ALIASES = new HashMap<>();
+    private final Map<String, Class<?>> typeAliases = new HashMap<>();
 
     public TypeAliasRegistry() {
         // 构造函数里注册系统内置的类型别名
@@ -26,15 +30,26 @@ public class TypeAliasRegistry {
         registerAlias("double", Double.class);
         registerAlias("float", Float.class);
         registerAlias("boolean", Boolean.class);
+        registerAlias("unpooled", UnpooledDataSourceFactory.class);
     }
 
     public void registerAlias(String alias, Class<?> value) {
         String key = alias.toLowerCase(Locale.ENGLISH);
-        TYPE_ALIASES.put(key, value);
+        typeAliases.put(key, value);
     }
 
     public <T> Class<T> resolveAlias(String string) {
-        String key = string.toLowerCase(Locale.ENGLISH);
-        return (Class<T>) TYPE_ALIASES.get(key);
+        try {
+            String key = string.toLowerCase(Locale.ENGLISH);
+            Class<T> value;
+            if (typeAliases.containsKey(key)) {
+                value = (Class<T>) typeAliases.get(key);
+            } else {
+                value = (Class<T>) Resources.classForName(string);
+            }
+            return value;
+        }catch (Exception e){
+            throw new RuntimeException("Could not resolve type alias '" + string + "'.  Cause: " + e, e);
+        }
     }
 }

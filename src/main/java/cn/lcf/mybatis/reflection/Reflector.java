@@ -131,7 +131,11 @@ public class Reflector {
     private void resolveSetterConflicts(Map<String, List<Method>> conflictingSetters) {
         for (Map.Entry<String, List<Method>> entry : conflictingSetters.entrySet()) {
             //todo 匹配
-            setMethods.put(entry.getKey(), new MethodInvoker(entry.getValue().get(0)));
+            String name = entry.getKey();
+            Method method = entry.getValue().get(0);
+            setMethods.put(name, new MethodInvoker(method));
+            Type[] paramTypes = method.getGenericParameterTypes();
+            setTypes.put(name, typeToClass(paramTypes[0]));
         }
     }
 
@@ -145,9 +149,35 @@ public class Reflector {
     private void resolveGetterConflicts(Map<String, List<Method>> conflictingGetters) {
         for (Map.Entry<String, List<Method>> entry : conflictingGetters.entrySet()) {
             //todo 匹配
-            getMethods.put(entry.getKey(), new MethodInvoker(entry.getValue().get(0)));
+            String name = entry.getKey();
+            Method method = entry.getValue().get(0);
+            getMethods.put(name, new MethodInvoker(method));
+            Type returnType = method.getGenericReturnType();
+            getTypes.put(name, typeToClass(returnType));
         }
     }
+
+    private Class<?> typeToClass(Type src) {
+        Class<?> result = null;
+        if (src instanceof Class) {
+            result = (Class<?>) src;
+        } else if (src instanceof ParameterizedType) {
+            result = (Class<?>) ((ParameterizedType) src).getRawType();
+        } else if (src instanceof GenericArrayType) {
+            Type componentType = ((GenericArrayType) src).getGenericComponentType();
+            if (componentType instanceof Class) {
+                result = Array.newInstance((Class<?>) componentType, 0).getClass();
+            } else {
+                Class<?> componentClass = typeToClass(componentType);
+                result = Array.newInstance(componentClass, 0).getClass();
+            }
+        }
+        if (result == null) {
+            result = Object.class;
+        }
+        return result;
+    }
+
 
     private void addMethodConflict(Map<String, List<Method>> conflictingMethods, String name, Method method) {
         if (isValidPropertyName(name)) {
